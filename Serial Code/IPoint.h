@@ -1,4 +1,9 @@
-﻿class IPoint
+﻿#ifndef IPOINT_H
+#define IPOINT_H
+
+#include <cmath>
+
+class IPoint
 {
 
 public:
@@ -9,11 +14,13 @@ public:
     IPoint()
     {
 		orientation = 0;
+		descriptor = 0;
     }
 	
 	~IPoint()
 	{
-		delete[] descriptor;
+		if (descriptor != 0)
+			delete[] descriptor;
 	}
 
     /// <summary>
@@ -45,11 +52,13 @@ public:
     /// Descriptor vector
     /// </summary>
     int descriptorLength;
-    float [] descriptor = NULL;
+    float * descriptor;
+
     void SetDescriptorLength(int Size)
     {
 		descriptorLength = Size;
 		descriptor = new float[Size];
     }
-  }
-}
+};
+
+#endif

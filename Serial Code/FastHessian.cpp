@@ -1,10 +1,8 @@
-#include <list>
+#include "IPoint.h"
 #include <cmath>
+#include <vector>
 #include "FastHessian.h"
 #include "IntegralImage.h"
-#include "IPoint.h"
-
-using namespace std;
 
 /// <summary>
 /// Static one-call do it all method
@@ -14,10 +12,10 @@ using namespace std;
 /// <param name="init_sample"></param>
 /// <param name="img"></param>
 /// <returns></returns>
-static list<IPoint> FastHessian::getIpoints(float thresh, int octaves, int init_sample, IntegralImage img)
+std::vector<IPoint> * FastHessian::getIpoints(float thresh, int octaves, int init_sample, IntegralImage img)
 {
-	FastHessian fh = new FastHessian(thresh, octaves, init_sample, img);
-	return fh.getIpoints();
+	FastHessian * fh = new FastHessian(thresh, octaves, init_sample, img);
+	return fh->getIpoints();
 }
 
 
@@ -30,23 +28,23 @@ static list<IPoint> FastHessian::getIpoints(float thresh, int octaves, int init_
 /// <param name="img"></param>
 FastHessian::FastHessian(float thresh, int octaves, int init_sample, IntegralImage img)
 {
-	this.thresh = thresh;
-	this.octaves = octaves;
-	this.init_sample = init_sample;
-	this.img = img;
+	this->thresh = thresh;
+	this->octaves = octaves;
+	this->init_sample = init_sample;
+	this->img = img;
 }
 
 /// <summary>
 /// Find the image features and write into vector of features
 /// </summary>
-list<IPoint> FastHessian::getIpoints()
+std::vector<IPoint> * FastHessian::getIpoints()
 {
 	// filter index map
-	int [5][4] filter_map = {{0,1,2,3}, {1,3,4,5}, {3,5,6,7}, {5,7,8,9}, {7,9,10,11}};
+	int filter_map[5][4] = {{0,1,2,3}, {1,3,4,5}, {3,5,6,7}, {5,7,8,9}, {7,9,10,11}};
 
 	// Clear the vector of exisiting ipts
-	if (ipts == NULL) ipts = new list<IPoint>();
-	else ipts.clear();
+	if (ipts == NULL) ipts = new std::vector<IPoint>();
+	else ipts->clear();
 
 	// Build the response map
 	buildResponseMap();
@@ -55,9 +53,9 @@ list<IPoint> FastHessian::getIpoints()
 	ResponseLayer b, m, t;
 	for (int o = 0; o < octaves; ++o) for (int i = 0; i <= 1; ++i)
 	{
-		b = responseMap[filter_map[o][i]];
-		m = responseMap[filter_map[o][i+1]];
-		t = responseMap[filter_map[o][i+2]];
+		b = (*responseMap)[filter_map[o][i]];
+		m = (*responseMap)[filter_map[o][i+1]];
+		t = (*responseMap)[filter_map[o][i+2]];
 
 		// loop over middle response layer at density of the most 
 		// sparse layer (always top), to find maxima across scale and space
@@ -90,8 +88,8 @@ void FastHessian::buildResponseMap()
 	// Oct5: 99, 195,291,387
 
 	// Deallocate memory and clear any existing response layers
-	if (responseMap == NULL) responseMap = new list<ResponseLayer>();
-	else responseMapresponseMap.clear();
+	if (responseMap == NULL) responseMap = new std::vector<ResponseLayer>();
+	else responseMap->clear();
 
 	// Get image attributes
 	int w = (img.Width / init_sample);
@@ -101,40 +99,40 @@ void FastHessian::buildResponseMap()
 	// Calculate approximated determinant of hessian values
 	if (octaves >= 1)
 	{
-		responseMap.Add(new ResponseLayer(w, h, s,  9));
-		responseMap.Add(new ResponseLayer(w, h, s, 15));
-		responseMap.Add(new ResponseLayer(w, h, s, 21));
-		responseMap.Add(new ResponseLayer(w, h, s, 27));
+		responseMap->push_back(ResponseLayer(w, h, s,  9));
+		responseMap->push_back(ResponseLayer(w, h, s, 15));
+		responseMap->push_back(ResponseLayer(w, h, s, 21));
+		responseMap->push_back(ResponseLayer(w, h, s, 27));
 	}
 	 
 	if (octaves >= 2)
 	{
-		responseMap.Add(new ResponseLayer(w / 2, h / 2, s * 2, 39));
-		responseMap.Add(new ResponseLayer(w / 2, h / 2, s * 2, 51));
+		responseMap->push_back(ResponseLayer(w / 2, h / 2, s * 2, 39));
+		responseMap->push_back(ResponseLayer(w / 2, h / 2, s * 2, 51));
 	}
 
 	if (octaves >= 3)
 	{
-		responseMap.Add(new ResponseLayer(w / 4, h / 4, s * 4, 75));
-		responseMap.Add(new ResponseLayer(w / 4, h / 4, s * 4, 99));
+		responseMap->push_back(ResponseLayer(w / 4, h / 4, s * 4, 75));
+		responseMap->push_back(ResponseLayer(w / 4, h / 4, s * 4, 99));
 	}
 
 	if (octaves >= 4)
 	{
-		responseMap.Add(new ResponseLayer(w / 8, h / 8, s * 8, 147));
-		responseMap.Add(new ResponseLayer(w / 8, h / 8, s * 8, 195));
+		responseMap->push_back(ResponseLayer(w / 8, h / 8, s * 8, 147));
+		responseMap->push_back(ResponseLayer(w / 8, h / 8, s * 8, 195));
 	}
 
 	if (octaves >= 5)
 	{
-		responseMap.Add(new ResponseLayer(w / 16, h / 16, s * 16, 291));
-		responseMap.Add(new ResponseLayer(w / 16, h / 16, s * 16, 387));
+		responseMap->push_back(ResponseLayer(w / 16, h / 16, s * 16, 291));
+		responseMap->push_back(ResponseLayer(w / 16, h / 16, s * 16, 387));
 	}
 
 	  // Extract responses from the image
-	for (int i = 0; i < responseMap.Count; ++i)
+	for (unsigned int i = 0; i < responseMap->size(); ++i)
 	{
-		buildResponseLayer(responseMap[i]);
+		buildResponseLayer((*responseMap)[i]);
 	}
 }
 
@@ -232,15 +230,15 @@ bool FastHessian::isExtremum(int r, int c, ResponseLayer t, ResponseLayer m, Res
 /// <param name="b"></param>
 void FastHessian::interpolateExtremum(int r, int c, ResponseLayer t, ResponseLayer m, ResponseLayer b)
 {
-	double[] D    = BuildDerivative(r, c, t, m, b);
-	double[][] H  = BuildHessian(r, c, t, m, b);
-	double[][] Hi = Inverse(H);
+	double * D    = BuildDerivative(r, c, t, m, b);
+	double ** H  = BuildHessian(r, c, t, m, b);
+	double ** Hi = Inverse(H);
 
 	if (Hi != NULL) {
-		double[] Of = MMM_Neg_3x3_3x1(Hi, D);
+		double * Of = MMM_neg_3x3_3x1(Hi, D);
 
 		// get the offsets from the interpolation
-		double[] O = { Of[0], Of[1], Of[2] };
+		double O[3] = { Of[0], Of[1], Of[2] };
 
 		// get the step distance between filters
 		int filterStep = (m.filter - b.filter);
@@ -253,7 +251,7 @@ void FastHessian::interpolateExtremum(int r, int c, ResponseLayer t, ResponseLay
 			ipt.y = (float)((r + O[1]) * t.step);
 			ipt.scale = (float)((0.1333f) * (m.filter + O[2] * filterStep));
 			ipt.laplacian = (int)(m.getLaplacian(r,c,t));
-			ipts.push_back(ipt);
+			ipts->push_back(ipt);
 		}
 
 		delete[] Of;
@@ -279,7 +277,7 @@ void FastHessian::interpolateExtremum(int r, int c, ResponseLayer t, ResponseLay
 /// <param name="row"></param>
 /// <param name="column"></param>
 /// <returns>3x1 Matrix of Derivatives</returns>
-double[] FastHessian::BuildDerivative(int r, int c, ResponseLayer t, ResponseLayer m, ResponseLayer b)
+double * FastHessian::BuildDerivative(int r, int c, ResponseLayer t, ResponseLayer m, ResponseLayer b)
 {
 	double dx, dy, ds;
 
@@ -287,7 +285,7 @@ double[] FastHessian::BuildDerivative(int r, int c, ResponseLayer t, ResponseLay
 	dy = (m.getResponse(r + 1, c, t) - m.getResponse(r - 1, c, t)) / (float)(2.0);
 	ds = (t.getResponse(r, c) - b.getResponse(r, c, t)) / (float)(2.0);
 
-	double[] D = new double[3];
+	double * D = new double[3];
 	D[0] = dx;
 	D[1] = dy;
 	D[2] = ds;
@@ -303,7 +301,7 @@ double[] FastHessian::BuildDerivative(int r, int c, ResponseLayer t, ResponseLay
 /// <param name="row"></param>
 /// <param name="column"></param>
 /// <returns>3x3 Matrix of Second Order Derivatives</returns>
-double[][] FastHessian::BuildHessian(int r, int c, ResponseLayer t, ResponseLayer m, ResponseLayer b)
+double ** FastHessian::BuildHessian(int r, int c, ResponseLayer t, ResponseLayer m, ResponseLayer b)
 {
 	double v, dxx, dyy, dss, dxy, dxs, dys;
 
@@ -335,10 +333,10 @@ double[][] FastHessian::BuildHessian(int r, int c, ResponseLayer t, ResponseLaye
 	return H;
 }
 
-double[][] FastHessian::Inverse(double[][] m)
+double ** FastHessian::Inverse(double ** m)
 {
-	double det = ((m[0][0]*m[1][1]*m[2][2]) + ((m[0][1]*m[1][2]*m[2][0]) + ((m[0][2]*m[1][0]*m[2][1]) -
-				 ((m[0][2]*m[1][1]*m[2][0]) - ((m[0][1]*m[1][0]*m[2][2]) - ((m[0][0]*m[1][2]*m[2][1]);
+	double det = ((m[0][0]*m[1][1]*m[2][2]) + (m[0][1]*m[1][2]*m[2][0]) + (m[0][2]*m[1][0]*m[2][1]) -
+				  (m[0][2]*m[1][1]*m[2][0]) - (m[0][1]*m[1][0]*m[2][2]) - (m[0][0]*m[1][2]*m[2][1]));
 
 	if (det == 0) return NULL;
 
@@ -370,9 +368,9 @@ double[][] FastHessian::Inverse(double[][] m)
 
 }
 
-double[] FastHessian::MMM_neg_3x3_3x1(double[][] A, double[] B)
+double * FastHessian::MMM_neg_3x3_3x1(double ** A, double * B)
 {
-	double[] C = new double[3];
+	double * C = new double[3];
 	double a = -1 * (A[0][0] * B[0] + A[0][1] * B[1] + A[0][2] * B[2]);
 	double b = -1 * (A[1][0] * B[0] + A[1][1] * B[1] + A[1][2] * B[2]);
 	double c = -1 * (A[2][0] * B[0] + A[2][1] * B[1] + A[2][2] * B[2]);
