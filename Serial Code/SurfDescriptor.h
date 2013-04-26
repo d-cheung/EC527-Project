@@ -18,10 +18,14 @@ private:
 	IntegralImage img;
 
 public:
-	static void DecribeInterestPoints(List<IPoint> ipts, bool upright, bool extended, IntegralImage img);
-	void DescribeInterestPoints(List<IPoint> ipts, bool upright, bool extended, IntegralImage img);
-	void GetOrientation(IPoint ip);
-	void GetDescriptor(IPoint ip, bool bUpright, bool bExtended);
+	SurfDescriptor()
+	{
+
+	}
+	static void DecribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage &img);
+	void DescribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage &img);
+	void GetOrientation(IPoint &ip);
+	void GetDescriptor(IPoint &ip, bool bUpright, bool bExtended);
 	double GetAngle(float X, float Y);
 	float Gaussian(int x, int y, float sig);
 	float Gaussian(float x, float y, float sig);
