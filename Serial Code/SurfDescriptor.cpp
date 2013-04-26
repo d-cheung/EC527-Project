@@ -1,9 +1,20 @@
 #include <vector>
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include "SurfDescriptor.h"
 #include "IPoint.h"
 #include "IntegralImage.h"
 #include "FastHessian.h"
+
+float SurfDescriptor::gauss25[7][7] = {
+	{(float)0.02350693969273,(float)0.01849121369071,(float)0.01239503121241,(float)0.00708015417522,(float)0.00344628101733,(float)0.00142945847484,(float)0.00050524879060}, 
+	{(float)0.02169964028389,(float)0.01706954162243,(float)0.01144205592615,(float)0.00653580605408,(float)0.00318131834134,(float)0.00131955648461,(float)0.00046640341759}, 
+	{(float)0.01706954162243,(float)0.01342737701584,(float)0.00900063997939,(float)0.00514124713667,(float)0.00250251364222,(float)0.00103799989504,(float)0.00036688592278},
+	{(float)0.01144205592615,(float)0.00900063997939,(float)0.00603330940534,(float)0.00344628101733,(float)0.00167748505986,(float)0.00069579213743,(float)0.00024593098864},
+	{(float)0.00653580605408,(float)0.00514124713667,(float)0.00344628101733,(float)0.00196854695367,(float)0.00095819467066,(float)0.00039744277546,(float)0.00014047800980},
+	{(float)0.00318131834134,(float)0.00250251364222,(float)0.00167748505986,(float)0.00095819467066,(float)0.00046640341759,(float)0.00019345616757,(float)0.00006837798818},
+	{(float)0.00131955648461,(float)0.00103799989504,(float)0.00069579213743,(float)0.00039744277546,(float)0.00019345616757,(float)0.00008024231247,(float)0.00002836202103}
+};
 
 
 /// <summary>
@@ -13,10 +24,10 @@
 /// <param name="ipts"></param>
 /// <param name="extended"></param>
 /// <param name="upright"></param>
-static void DecribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage &img)
+void SurfDescriptor::DecribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage * img)
 {
-    SurfDescriptor des = new SurfDescriptor();
-    des->DescribeInterestPoints(ipts, upright, extended, img);
+    SurfDescriptor des;
+    des.DescribeInterestPoints(ipts, upright, extended, img);
 }
 
 
@@ -26,22 +37,22 @@ static void DecribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool 
     /// <param name="img"></param>
     /// <param name="ipts"></param>
     /// <param name="upright"></param>
-void DescribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage &img)
+void SurfDescriptor::DescribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage *img)
 {
     if (ipts->size() == 0) return;
     this->img = img;
       
-	for (std::vector<IPoint>::iterator ip = ipts->begin() ; ip != ipts->end(); ++ip)
+	for (std::vector<IPoint>::iterator ip = ipts->begin(); ip != ipts->end(); ++ip)
     {
 		// determine descriptor size
-		if (extended) ip.descriptorLength = 128;
-		else ip.descriptorLength = 64;
+		if (extended) ip->descriptorLength = 128;
+		else ip->descriptorLength = 64;
 
 		// if we want rotation invariance get the orientation
-		if (!upright) GetOrientation(ip);
+		if (!upright) GetOrientation(*ip);
 
 		// Extract SURF descriptor
-		GetDescriptor(ip, upright, extended);
+		GetDescriptor(*ip, upright, extended);
     }
 }
 
@@ -49,14 +60,14 @@ void DescribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extend
     /// Determine dominant orientation for InterestPoint
     /// </summary>
     /// <param name="ip"></param>
-void GetOrientation(IPoint &ip)
+void SurfDescriptor::GetOrientation(IPoint &ip)
 {
   const unsigned char Responses = 109;
-  float[] resX = new float[Responses];
-  float[] resY = new float[Responses];
-  float[] Ang = new float[Responses];
+  float resX[Responses];
+  float resY[Responses];
+  float Ang[Responses];
   int idx = 0;
-  int[] id = { 6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6 };
+  int id[13] = { 6, 5, 4, 3, 2, 1, 0, 1, 2, 3, 4, 5, 6 };
 
   // Get rounded InterestPoint data
   int X = (int)floor(ip.x + (float)0.5);
@@ -70,9 +81,9 @@ void GetOrientation(IPoint &ip)
 	{
 	  if (i * i + j * j < 36)
 	  {
-		float gauss = gauss25[id[i + 6], id[j + 6]];
-		resX[idx] = gauss * img.HaarX(Y + j * S, X + i * S, 4 * S);
-		resY[idx] = gauss * img.HaarY(Y + j * S, X + i * S, 4 * S);
+		float gauss = gauss25[id[i + 6]][id[j + 6]];
+		resX[idx] = gauss * img->HaarX(Y + j * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + j * S, X + i * S, 4 * S);
 		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
 		++idx;
 	  }
@@ -125,7 +136,7 @@ void GetOrientation(IPoint &ip)
     /// Construct descriptor vector for this interest point
     /// </summary>
     /// <param name="bUpright"></param>
-void GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
+void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 {
     int sample_x, sample_y, count = 0;
     int i = 0, ix = 0, j = 0, jx = 0, xs = 0, ys = 0;
@@ -193,8 +204,8 @@ void GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 
 					//Get the gaussian weighted x and y responses
 					gauss_s1 = Gaussian(xs - sample_x, ys - sample_y, (float)2.5 * S);
-					rx = (float)img.HaarX(sample_y, sample_x, 2 * S);
-					ry = (float)img.HaarY(sample_y, sample_x, 2 * S);
+					rx = (float)img->HaarX(sample_y, sample_x, 2 * S);
+					ry = (float)img->HaarY(sample_y, sample_x, 2 * S);
 
 					//Get the gaussian weighted x and y responses on rotated axis
 					rrx = gauss_s1 * (-rx * si + ry * co);
@@ -207,32 +218,32 @@ void GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 						if (rry >= 0)
 						{
 							dx += rrx;
-							mdx += abs(rrx);
+							mdx += fabs(rrx);
 						}
 						else
 						{
 							dx_yn += rrx;
-							mdx_yn += abs(rrx);
+							mdx_yn += fabs(rrx);
 						}
 
 						// split y responses for different signs of x
 						if (rrx >= 0)
 						{
 							dy += rry;
-							mdy += abs(rry);
+							mdy += fabs(rry);
 						}
 						else
 						{
 							dy_xn += rry;
-							mdy_xn += abs(rry);
+							mdy_xn += fabs(rry);
 						}
 					}
 					else
 					{
 						dx += rrx;
 						dy += rry;
-						mdx += abs(rrx);
-						mdy += abs(rry);
+						mdx += fabs(rrx);
+						mdy += fabs(rry);
 					}
 				}
 			}
@@ -280,7 +291,7 @@ void GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 /// <param name="X"></param>
 /// <param name="Y"></param>
 /// <returns></returns>
-double GetAngle(float X, float Y)
+double SurfDescriptor::GetAngle(float X, float Y)
 {
   if (X >= 0 && Y >= 0)
 	return atan(Y / X);
@@ -303,7 +314,7 @@ double GetAngle(float X, float Y)
 /// <param name="y"></param>
 /// <param name="sig"></param>
 /// <returns></returns>
-float Gaussian(int x, int y, float sig)
+float SurfDescriptor::Gaussian(int x, int y, float sig)
 {
   float pi = (float)M_PI;
   return ((float)1 / ((float)2 * pi * sig * sig)) * (float)exp(-(x * x + y * y) / ((float)2.0 * sig * sig));
@@ -318,7 +329,7 @@ float Gaussian(int x, int y, float sig)
 /// <param name="y"></param>
 /// <param name="sig"></param>
 /// <returns></returns>
-float Gaussian(float x, float y, float sig)
+float SurfDescriptor::Gaussian(float x, float y, float sig)
 {
   float pi = (float)M_PI;
   return (float)1 / ((float)2 * pi * sig * sig) * (float)exp(-(x * x + y * y) / ((float)2.0 * sig * sig));
