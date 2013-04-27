@@ -1,8 +1,7 @@
-
 default:
-	g++ *.cpp -o surf
+	g++ *.cpp -o surf -lrt -lm
 gdb: 
-	g++ -g *.cpp -o surf
+	g++ -g *.cpp -o surf -lrt -lm
 
 clean:
-	rm surf *~
+	rm -f surf *~
