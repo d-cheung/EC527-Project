@@ -3,7 +3,15 @@
 #include <pthread.h>
 #include <cmath>
 
-const int NUM_THREADS = 8;
+const int NUM_THREADS = 32;
+
+pthread_barrier_t barr;
+struct thread_data {
+	int thread_id;
+	IntegralImage * pic;
+	bitmap_image * image;
+};
+
 
 const float IntegralImage::cR = (float).2989;
 const float IntegralImage::cG = (float).5870;
@@ -57,9 +65,10 @@ IntegralImage::~IntegralImage()
 
 IntegralImage * IntegralImage::FromImage(bitmap_image &image)
 {
+	void  * FromImage_work(void * threadarg);
 	IntegralImage * pic = new IntegralImage(image.width(), image.height());
 	pthread_t threads[NUM_THREADS];
-	struct thread_data data;
+	struct thread_data data[NUM_THREADS];
 
 	if (pthread_barrier_init(&barr, NULL, NUM_THREADS))
 	{
@@ -69,14 +78,15 @@ IntegralImage * IntegralImage::FromImage(bitmap_image &image)
 
 	for (int t = 0; t < NUM_THREADS; t++)
 	{
-		data.thread_id = t;
-		data.pic = pic;
-		data.image = image;
-		int rc = pthread_create(&threads[t], NULL, FromImage_work, (void*) &data);
+		data[t].thread_id = t;
+		data[t].pic = pic;
+		data[t].image = &image;
+
+		int rc = pthread_create(&threads[t], NULL, FromImage_work, (void*) &(data[t]));
 		if (rc)
 		{
 			printf("ERROR: return code from pthread_create() is %d\n", rc);
-			exit(-1)
+			exit(-1);
 		}
 	}
 	
@@ -92,31 +102,34 @@ IntegralImage * IntegralImage::FromImage(bitmap_image &image)
 	return pic;
 }
 
-void IntegralImage::FromImage_work(void * threadarg)
+void  * FromImage_work(void * threadarg)
 {
 	struct thread_data * my_data = (struct thread_data *) threadarg;
 	IntegralImage * pic = my_data->pic;
-	bitmap_image &image = my_data->image;
+	bitmap_image * image = my_data->image;
 	int thread_id = my_data-> thread_id;
 
-	unsigned int start = (image.width() / NUM_THREADS) * thread_id;
-	unsigned int end = (image.width() / NUM_THREADS) + start;
-	if (end > image.width()) end  = image.width();
 
+	float colsum = 0;
 	float rowsum = 0;
 	unsigned char red, green, blue;
 
-	for (unsigned int x = start; x < end; x++)
+	unsigned int start = (image->height() / NUM_THREADS) * thread_id;
+	unsigned int end = (image->height() / NUM_THREADS) + start;
+	if (end > image->height()) end  = image->height();
+
+	for (unsigned int y = start; y < end; y++)
 	{
 		rowsum = 0;
-		for (unsigned int y = 0; y < image.height(); y++)
+		for (unsigned int x = 0; x < image->width(); x++)
 		{
-			image.get_pixel(x, y, red, green, blue);
-			rowsum += (cR * red + cG * green + cB * blue) / (float)255;
+			image->get_pixel(x, y, red, green, blue);
+			rowsum += (pic->cR * red + pic->cG * green + pic->cB * blue) / (float)255;
 
 			pic->setValue(y, x, rowsum);
 		}
 	}
+
 
 	int rc = pthread_barrier_wait(&barr);
 	if (rc != 0 && rc!= PTHREAD_BARRIER_SERIAL_THREAD)
@@ -125,19 +138,17 @@ void IntegralImage::FromImage_work(void * threadarg)
 		exit(-1);
 	}
 
-	start = (image.height() / NUM_THREADS) * thread_id;
-	end = (image.height() / NUM_THREADS) + start;
-	if (end > image.height()) end  = image.height();
+	start = (image->width() / NUM_THREADS) * thread_id;
+	end = (image->width() / NUM_THREADS) + start;
+	if (end > image->width()) end  = image->width();
 
-	for (unsigned int y = start; x < end; y++)
+	for (unsigned int x = start; x < end; x++)
 	{
-		rowsum = 0;
-		for (unsigned int x = 0; x < image.width; x++)
+		colsum = pic->getValue(0, x);
+		for (unsigned int y = 1; y < image->height(); y++)
 		{
-			image.get_pixel(x, y, red, green, blue);
-			rowsum += (cR * red + cG * green + cB * blue) / (float)255;
-
-			pic->setValue(y, x, rowsum);
+			colsum += pic->getValue(y,x);
+			pic->setValue(y, x, colsum);
 		}
 	}
 

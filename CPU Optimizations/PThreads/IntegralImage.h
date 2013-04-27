@@ -7,21 +7,19 @@
 class IntegralImage
 {
 private:
-	static const int NUM_THREADS;
-	pthread_barrier_t barr;
 
-	static const float cR;
-	static const float cG;
-	static const float cB;
 //	float * Matrix;
 	float ** Matrix;
 
 	IntegralImage(int width, int height);
 	
 	//PThread work function
-	void FromImage_work(void * threadarg);
+	void * FromImage_work(void * threadarg);
 
 public:
+	static const float cR;
+	static const float cG;
+	static const float cB;
 	int Width, Height;
 
 	//Get the value at [y,x]
@@ -46,10 +44,5 @@ public:
 	~IntegralImage();
 };
 
-struct thread_data {
-	int thread_id;
-	IntegralImage * pic;
-	bitmap_image &image;
-};
 
 #endif
