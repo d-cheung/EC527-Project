@@ -158,34 +158,111 @@ void FastHessian::buildResponseLayer(ResponseLayer &rl)
 	int l = rl.filter / 3;                   // lobe for this filter (filter size / 3)
 	int w = rl.filter;                       // filter size
 	float inverse_area = (float)1.0 / (w * w);       // normalisation factor
-	float Dxx, Dyy, Dxy;
+	float Dxx0, Dyy0, Dxy0;
+	float Dxx1, Dyy1, Dxy1;
+	float Dxx2, Dyy2, Dxy2;
+	float Dxx3, Dyy3, Dxy3;
 
-	for (int r, c, ar = 0, index = 0; ar < rl.height; ++ar)
+	for (int r, c0, c1, c2 ,c3, ar = 0, index = 0; ar < rl.height; ++ar)
 	{
-		for (int ac = 0; ac < rl.width; ++ac, index++)
+		int ac;
+		for (ac = 0; ac < rl.width-4; ac+=4, index+=4)
 		{
 			// get the image coordinates
 			r = ar * step;
-			c = ac * step;
+			c0 = (ac+0) * step;
+			c1 = (ac+1) * step;
+			c2 = (ac+2) * step;
+			c3 = (ac+3) * step;
 
 			// Compute response components
-			Dxx = img->BoxIntegral(r - l + 1, c - b, 2 * l - 1, w)
-			    - img->BoxIntegral(r - l + 1, c - l / 2, 2 * l - 1, l) * 3;
-			Dyy = img->BoxIntegral(r - b, c - l + 1, w, 2 * l - 1)
-			    - img->BoxIntegral(r - l / 2, c - l + 1, l, 2 * l - 1) * 3;
-			Dxy = + img->BoxIntegral(r - l, c + 1, l, l)
-			      + img->BoxIntegral(r + 1, c - l, l, l)
-			      - img->BoxIntegral(r - l, c - l, l, l)
-			      - img->BoxIntegral(r + 1, c + 1, l, l);
+			Dxx0 = img->BoxIntegral(r - l + 1, (c0) - b, 2 * l - 1, w)
+			     - img->BoxIntegral(r - l + 1, (c0) - l / 2, 2 * l - 1, l) * 3;
+			Dxx1 = img->BoxIntegral(r - l + 1, (c1) - b, 2 * l - 1, w)
+			     - img->BoxIntegral(r - l + 1, (c1) - l / 2, 2 * l - 1, l) * 3;
+			Dxx2 = img->BoxIntegral(r - l + 1, (c2) - b, 2 * l - 1, w)
+			     - img->BoxIntegral(r - l + 1, (c2) - l / 2, 2 * l - 1, l) * 3;
+			Dxx3 = img->BoxIntegral(r - l + 1, (c3) - b, 2 * l - 1, w)
+			     - img->BoxIntegral(r - l + 1, (c3) - l / 2, 2 * l - 1, l) * 3;
+
+			Dyy0 = img->BoxIntegral(r - b, (c0) - l + 1, w, 2 * l - 1)
+			     - img->BoxIntegral(r - l / 2, (c0) - l + 1, l, 2 * l - 1) * 3;
+			Dyy1 = img->BoxIntegral(r - b, (c1) - l + 1, w, 2 * l - 1)
+			     - img->BoxIntegral(r - l / 2, (c1) - l + 1, l, 2 * l - 1) * 3;
+			Dyy2 = img->BoxIntegral(r - b, (c2) - l + 1, w, 2 * l - 1)
+			     - img->BoxIntegral(r - l / 2, (c2) - l + 1, l, 2 * l - 1) * 3;
+			Dyy3 = img->BoxIntegral(r - b, (c3) - l + 1, w, 2 * l - 1)
+			     - img->BoxIntegral(r - l / 2, (c3) - l + 1, l, 2 * l - 1) * 3;
+
+			Dxy0 = + img->BoxIntegral(r - l, (c0) + 1, l, l)
+			       + img->BoxIntegral(r + 1, (c0) - l, l, l)
+			       - img->BoxIntegral(r - l, (c0) - l, l, l)
+			       - img->BoxIntegral(r + 1, (c0) + 1, l, l);
+			Dxy1 = + img->BoxIntegral(r - l, (c0) + 1, l, l)
+			       + img->BoxIntegral(r + 1, (c1) - l, l, l)
+			       - img->BoxIntegral(r - l, (c2) - l, l, l)
+			       - img->BoxIntegral(r + 1, (c3) + 1, l, l);
+			Dxy2 = + img->BoxIntegral(r - l, (c0) + 1, l, l)
+			       + img->BoxIntegral(r + 1, (c1) - l, l, l)
+			       - img->BoxIntegral(r - l, (c2) - l, l, l)
+			       - img->BoxIntegral(r + 1, (c3) + 1, l, l);
+			Dxy3 = + img->BoxIntegral(r - l, (c0) + 1, l, l)
+			       + img->BoxIntegral(r + 1, (c1) - l, l, l)
+			       - img->BoxIntegral(r - l, (c2) - l, l, l)
+			       - img->BoxIntegral(r + 1, (c3) + 1, l, l);
 
 			// Normalise the filter responses with respect to their size
-			Dxx *= inverse_area;
-			Dyy *= inverse_area;
-			Dxy *= inverse_area;
+			Dxx0 *= inverse_area;
+			Dxx1 *= inverse_area;
+			Dxx2 *= inverse_area;
+			Dxx3 *= inverse_area;
+
+			Dyy0 *= inverse_area;
+			Dyy1 *= inverse_area;
+			Dyy2 *= inverse_area;
+			Dyy3 *= inverse_area;
+
+			Dxy0 *= inverse_area;
+			Dxy1 *= inverse_area;
+			Dxy2 *= inverse_area;
+			Dxy3 *= inverse_area;
 
 			// Get the determinant of hessian response & laplacian sign
-			rl.responses[index] = (Dxx * Dyy - (float)0.81 * Dxy * Dxy);
-			rl.laplacian[index] = (unsigned char)(Dxx + Dyy >= 0 ? 1 : 0);
+			rl.responses[index+0] = (Dxx0 * Dyy0 - (float)0.81 * Dxy0 * Dxy0);
+			rl.responses[index+1] = (Dxx1 * Dyy1 - (float)0.81 * Dxy1 * Dxy1);
+			rl.responses[index+2] = (Dxx2 * Dyy2 - (float)0.81 * Dxy2 * Dxy2);
+			rl.responses[index+3] = (Dxx3 * Dyy3 - (float)0.81 * Dxy3 * Dxy3);
+
+			rl.laplacian[index+0] = (unsigned char)(Dxx0 + Dyy0 >= 0 ? 1 : 0);
+			rl.laplacian[index+1] = (unsigned char)(Dxx1 + Dyy1 >= 0 ? 1 : 0);
+			rl.laplacian[index+2] = (unsigned char)(Dxx2 + Dyy2 >= 0 ? 1 : 0);
+			rl.laplacian[index+3] = (unsigned char)(Dxx3 + Dyy3 >= 0 ? 1 : 0);
+		}
+
+		for (; ac < rl.width; ++ac, index++)
+		{
+			// get the image coordinates
+			r = ar * step;
+			c0 = (ac+0) * step;
+
+			// Compute response components
+			Dxx0 = img->BoxIntegral(r - l + 1, (c0) - b, 2 * l - 1, w)
+			     - img->BoxIntegral(r - l + 1, (c0) - l / 2, 2 * l - 1, l) * 3;
+			Dyy0 = img->BoxIntegral(r - b, (c0) - l + 1, w, 2 * l - 1)
+			     - img->BoxIntegral(r - l / 2, (c0) - l + 1, l, 2 * l - 1) * 3;
+			Dxy0 = + img->BoxIntegral(r - l, (c0) + 1, l, l)
+			       + img->BoxIntegral(r + 1, (c0) - l, l, l)
+			       - img->BoxIntegral(r - l, (c0) - l, l, l)
+			       - img->BoxIntegral(r + 1, (c0) + 1, l, l);
+
+			// Normalise the filter responses with respect to their size
+			Dxx0 *= inverse_area;
+			Dyy0 *= inverse_area;
+			Dxy0 *= inverse_area;
+
+			// Get the determinant of hessian response & laplacian sign
+			rl.responses[index+0] = (Dxx0 * Dyy0 - (float)0.81 * Dxy0 * Dxy0);
+			rl.laplacian[index+0] = (unsigned char)(Dxx0 + Dyy0 >= 0 ? 1 : 0);
 		}
 	}
 }

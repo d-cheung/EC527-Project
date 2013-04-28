@@ -70,17 +70,21 @@ IntegralImage * IntegralImage::FromImage(bitmap_image &image)
 	for (x = 0; x < image.width()-4; x+=4)
 	{
 		image.get_pixel(x+0, 0, red0, green0, blue0);
-		image.get_pixel(x+1, 1, red1, green1, blue1);
-		image.get_pixel(x+2, 2, red2, green2, blue2);
-		image.get_pixel(x+3, 3, red3, green3, blue3);
+		image.get_pixel(x+1, 0, red1, green1, blue1);
+		image.get_pixel(x+2, 0, red2, green2, blue2);
+		image.get_pixel(x+3, 0, red3, green3, blue3);
 		rowsum0 += (cR * red0 + cG * green0 + cB * blue0) / (float)255;
-		rowsum1 += (cR * red1 + cG * green1 + cB * blue1) / (float)255;
-		rowsum2 += (cR * red2 + cG * green2 + cB * blue2) / (float)255;
-		rowsum3 += (cR * red3 + cG * green3 + cB * blue3) / (float)255;
+		rowsum1 = (cR * red1 + cG * green1 + cB * blue1) / (float)255;
+		rowsum2 = (cR * red2 + cG * green2 + cB * blue2) / (float)255;
+		rowsum3 = (cR * red3 + cG * green3 + cB * blue3) / (float)255;
 		pic->setValue(0, x+0, rowsum0);
+		rowsum1 += rowsum0;
 		pic->setValue(0, x+1, rowsum1);
+		rowsum2 += rowsum1;
 		pic->setValue(0, x+2, rowsum2);
+		rowsum3 += rowsum2;
 		pic->setValue(0, x+3, rowsum3);
+		rowsum0 = rowsum3;
 	}
 	for (; x < image.width(); x++)
 	{
@@ -104,15 +108,19 @@ IntegralImage * IntegralImage::FromImage(bitmap_image &image)
 			image.get_pixel(x+2, y, red2, green2, blue2);
 			image.get_pixel(x+3, y, red3, green3, blue3);
 			rowsum0 += (cR * red0 + cG * green0 + cB * blue0) / (float)255;
-			rowsum1 += (cR * red1 + cG * green1 + cB * blue1) / (float)255;
-			rowsum2 += (cR * red2 + cG * green2 + cB * blue2) / (float)255;
-			rowsum3 += (cR * red3 + cG * green3 + cB * blue3) / (float)255;
+			rowsum1 = (cR * red1 + cG * green1 + cB * blue1) / (float)255;
+			rowsum2 = (cR * red2 + cG * green2 + cB * blue2) / (float)255;
+			rowsum3 = (cR * red3 + cG * green3 + cB * blue3) / (float)255;
 
 			// integral image is rowsum + value above		
 			pic->setValue(y, x+0, rowsum0 + pic->getValue(y - 1, x+0));
+			rowsum1 += rowsum0;
 			pic->setValue(y, x+1, rowsum1 + pic->getValue(y - 1, x+1));
+			rowsum2 += rowsum1;
 			pic->setValue(y, x+2, rowsum2 + pic->getValue(y - 1, x+2));
+			rowsum3 += rowsum2;
 			pic->setValue(y, x+3, rowsum3 + pic->getValue(y - 1, x+3));
+			rowsum0 = rowsum3;
 		}
 		for(; x < image.width(); x++)
 		{

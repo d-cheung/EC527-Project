@@ -9,7 +9,7 @@
 #include <time.h>
 
 #define GIG 1000000000
-#define CPG 2.53           // Cycles per GHz -- Adjust to your computer
+#define CPG 2.1           // Cycles per GHz -- Adjust to your computer
 #define ITERATIONS 10
 
 /************************************************************************************

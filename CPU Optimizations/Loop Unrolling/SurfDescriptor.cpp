@@ -77,16 +77,126 @@ void SurfDescriptor::GetOrientation(IPoint &ip)
   // calculate haar responses for points within radius of 6*scale
   for (int i = -6; i <= 6; ++i)
   {
-	for (int j = -6; j <= 6; ++j)
+	int j= -6;
+	int ii = i*i;
+	int j1 = (j+0)*(j+0);
+	int j2 = (j+1)*(j+1);
+	int j3 = (j+2)*(j+2);
+	int j4 = (j+3)*(j+3);
+	int j5 = (j+4)*(j+4);
+	int j6 = (j+5)*(j+5);
+	int j7 = (j+6)*(j+6);
+	int j8 = (j+7)*(j+7);
+	int j9 = (j+8)*(j+8);
+	int j10= (j+9)*(j+9);
+	int j11= (j+10)*(j+10);
+	int j12= (j+11)*(j+11);
+	int j13= (j+12)*(j+12);
+
+
+	if (ii + j1 < 36)
 	{
-	  if (i * i + j * j < 36)
-	  {
-		float gauss = gauss25[id[i + 6]][id[j + 6]];
-		resX[idx] = gauss * img->HaarX(Y + j * S, X + i * S, 4 * S);
-		resY[idx] = gauss * img->HaarY(Y + j * S, X + i * S, 4 * S);
+		float gauss = gauss25[id[i + 6]][id[j+0 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+0) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+0) * S, X + i * S, 4 * S);
 		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
 		++idx;
-	  }
+	}
+	if (ii + j2 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+1 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+1) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+1) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j3 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+2 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+2) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+2) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j4 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+3 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+3) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+3) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j5 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+4 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+4) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+4) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j6 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+5 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+5) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+5) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j7 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+6 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+6) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+6) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j8 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+7 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+7) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+7) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j9 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+8 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+8) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+8) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j10 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+9 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+9) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+9) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j11 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+10 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+10) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+10) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j12 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+11 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+11) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+11) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
+	}
+	if (ii + j13 < 36)
+	{
+		float gauss = gauss25[id[i + 6]][id[j+12 + 6]];
+		resX[idx] = gauss * img->HaarX(Y + (j+12) * S, X + i * S, 4 * S);
+		resY[idx] = gauss * img->HaarY(Y + (j+12) * S, X + i * S, 4 * S);
+		Ang[idx] = (float)GetAngle(resX[idx], resY[idx]);
+		++idx;
 	}
   }
 
@@ -138,12 +248,21 @@ void SurfDescriptor::GetOrientation(IPoint &ip)
     /// <param name="bUpright"></param>
 void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 {
-    int sample_x, sample_y, count = 0;
+    int sample_x0, sample_y0, count = 0;
+    int sample_x1, sample_y1;
+    int sample_x2, sample_y2;
+    int sample_x3, sample_y3;
     int i = 0, ix = 0, j = 0, jx = 0, xs = 0, ys = 0;
     float dx, dy, mdx, mdy, co, si;
     float dx_yn, mdx_yn, dy_xn, mdy_xn;
-    float gauss_s1 = (float)0, gauss_s2 = (float)0;
-    float rx = (float)0, ry = (float)0, rrx = (float)0, rry = (float)0, len = (float)0;
+    float gauss_s1_0 = (float)0, gauss_s2 = (float)0;
+    float gauss_s1_1 = (float)0;
+    float gauss_s1_2 = (float)0;
+    float gauss_s1_3 = (float)0;
+    float rx0 = (float)0, ry0 = (float)0, rrx0 = (float)0, rry0 = (float)0, len = (float)0;
+    float rx1 = (float)0, ry1 = (float)0, rrx1 = (float)0, rry1 = (float)0;
+    float rx2 = (float)0, ry2 = (float)0, rrx2 = (float)0, rry2 = (float)0;
+    float rx3 = (float)0, ry3 = (float)0, rrx3 = (float)0, rry3 = (float)0;
     float cx = (float)-0.5, cy = (float)0; //Subregion centers for the 4x4 gaussian weighting
 
     // Get rounded InterestPoint data
@@ -196,54 +315,212 @@ void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 
 			for (int k = i; k < i + 9; ++k)
 			{
-				for (int l = j; l < j + 9; ++l)
+				int l;
+				for (l = j; l < j + 9 - 4; l+=4)
 				{
 					//Get coords of sample point on the rotated axis
-					sample_x = (int)floor(X + (-l * S * si + k * S * co) + (float)0.5);
-					sample_y = (int)floor(Y + (l * S * co + k * S * si) + (float)0.5);
+					sample_x0 = (int)floor(X + ((-l+0) * S * si + k * S * co) + (float)0.5);
+					sample_x1 = (int)floor(X + ((-l+1) * S * si + k * S * co) + (float)0.5);
+					sample_x2 = (int)floor(X + ((-l+2) * S * si + k * S * co) + (float)0.5);
+					sample_x3 = (int)floor(X + ((-l+3) * S * si + k * S * co) + (float)0.5);
+
+					sample_y0 = (int)floor(Y + ((l+0) * S * co + k * S * si) + (float)0.5);
+					sample_y1 = (int)floor(Y + ((l+1) * S * co + k * S * si) + (float)0.5);
+					sample_y2 = (int)floor(Y + ((l+2) * S * co + k * S * si) + (float)0.5);
+					sample_y3 = (int)floor(Y + ((l+3) * S * co + k * S * si) + (float)0.5);
 
 					//Get the gaussian weighted x and y responses
-					gauss_s1 = Gaussian(xs - sample_x, ys - sample_y, (float)2.5 * S);
-					rx = (float)img->HaarX(sample_y, sample_x, 2 * S);
-					ry = (float)img->HaarY(sample_y, sample_x, 2 * S);
+					gauss_s1_0 = Gaussian(xs - sample_x0, ys - sample_y0, (float)2.5 * S);
+					gauss_s1_1 = Gaussian(xs - sample_x1, ys - sample_y1, (float)2.5 * S);
+					gauss_s1_2 = Gaussian(xs - sample_x2, ys - sample_y2, (float)2.5 * S);
+					gauss_s1_3 = Gaussian(xs - sample_x3, ys - sample_y3, (float)2.5 * S);
+
+					rx0 = (float)img->HaarX(sample_y0, sample_x0, 2 * S);
+					rx1 = (float)img->HaarX(sample_y1, sample_x1, 2 * S);
+					rx2 = (float)img->HaarX(sample_y2, sample_x2, 2 * S);
+					rx3 = (float)img->HaarX(sample_y3, sample_x3, 2 * S);
+
+					ry0 = (float)img->HaarY(sample_y0, sample_x0, 2 * S);
+					ry1 = (float)img->HaarY(sample_y1, sample_x1, 2 * S);
+					ry2 = (float)img->HaarY(sample_y2, sample_x2, 2 * S);
+					ry3 = (float)img->HaarY(sample_y3, sample_x3, 2 * S);
 
 					//Get the gaussian weighted x and y responses on rotated axis
-					rrx = gauss_s1 * (-rx * si + ry * co);
-					rry = gauss_s1 * (rx * co + ry * si);
+					rrx0 = gauss_s1_0 * (-rx0 * si + ry0 * co);
+					rrx1 = gauss_s1_1 * (-rx1 * si + ry1 * co);
+					rrx2 = gauss_s1_2 * (-rx2 * si + ry2 * co);
+					rrx3 = gauss_s1_3 * (-rx3 * si + ry3 * co);
 
+					rry0 = gauss_s1_0 * (rx0 * co + ry0 * si);
+					rry1 = gauss_s1_1 * (rx1 * co + ry1 * si);
+					rry2 = gauss_s1_2 * (rx2 * co + ry2 * si);
+					rry3 = gauss_s1_3 * (rx3 * co + ry3 * si);
 
 					if (bExtended)
 					{
 						// split x responses for different signs of y
-						if (rry >= 0)
+						if (rry0 >= 0)
 						{
-							dx += rrx;
-							mdx += fabs(rrx);
+							dx += rrx0;
+							mdx += fabs(rrx0);
 						}
 						else
 						{
-							dx_yn += rrx;
-							mdx_yn += fabs(rrx);
+							dx_yn += rrx0;
+							mdx_yn += fabs(rrx0);
 						}
 
 						// split y responses for different signs of x
-						if (rrx >= 0)
+						if (rrx0 >= 0)
 						{
-							dy += rry;
-							mdy += fabs(rry);
+							dy += rry0;
+							mdy += fabs(rry0);
 						}
 						else
 						{
-							dy_xn += rry;
-							mdy_xn += fabs(rry);
+							dy_xn += rry0;
+							mdy_xn += fabs(rry0);
+						}
+						// split x responses for different signs of y
+						if (rry1 >= 0)
+						{
+							dx += rrx1;
+							mdx += fabs(rrx1);
+						}
+						else
+						{
+							dx_yn += rrx1;
+							mdx_yn += fabs(rrx1);
+						}
+
+						// split y responses for different signs of x
+						if (rrx1 >= 0)
+						{
+							dy += rry1;
+							mdy += fabs(rry1);
+						}
+						else
+						{
+							dy_xn += rry1;
+							mdy_xn += fabs(rry1);
+						}
+						// split x responses for different signs of y
+						if (rry2 >= 0)
+						{
+							dx += rrx2;
+							mdx += fabs(rrx2);
+						}
+						else
+						{
+							dx_yn += rrx2;
+							mdx_yn += fabs(rrx2);
+						}
+
+						// split y responses for different signs of x
+						if (rrx2 >= 0)
+						{
+							dy += rry2;
+							mdy += fabs(rry2);
+						}
+						else
+						{
+							dy_xn += rry2;
+							mdy_xn += fabs(rry2);
+						}
+						// split x responses for different signs of y
+						if (rry3 >= 0)
+						{
+							dx += rrx3;
+							mdx += fabs(rrx3);
+						}
+						else
+						{
+							dx_yn += rrx3;
+							mdx_yn += fabs(rrx3);
+						}
+
+						// split y responses for different signs of x
+						if (rrx3 >= 0)
+						{
+							dy += rry3;
+							mdy += fabs(rry3);
+						}
+						else
+						{
+							dy_xn += rry3;
+							mdy_xn += fabs(rry3);
 						}
 					}
 					else
 					{
-						dx += rrx;
-						dy += rry;
-						mdx += fabs(rrx);
-						mdy += fabs(rry);
+						dx += rrx0;
+						dx += rrx1;
+						dx += rrx2;
+						dx += rrx3;
+
+						dy += rry0;
+						dy += rry1;
+						dy += rry2;
+						dy += rry3;
+
+						mdx += fabs(rrx0);
+						mdx += fabs(rrx1);
+						mdx += fabs(rrx2);
+						mdx += fabs(rrx3);
+
+						mdy += fabs(rry0);
+						mdy += fabs(rry1);
+						mdy += fabs(rry2);
+						mdy += fabs(rry3);
+					}
+				}
+				for (; l < j + 9; ++l)
+				{
+					//Get coords of sample point on the rotated axis
+					sample_x0 = (int)floor(X + ((-l+0) * S * si + k * S * co) + (float)0.5);
+					sample_y0 = (int)floor(Y + ((l+0) * S * co + k * S * si) + (float)0.5);
+
+					//Get the gaussian weighted x and y responses
+					gauss_s1_0 = Gaussian(xs - sample_x0, ys - sample_y0, (float)2.5 * S);
+					rx0 = (float)img->HaarX(sample_y0, sample_x0, 2 * S);
+					ry0 = (float)img->HaarY(sample_y0, sample_x0, 2 * S);
+
+					//Get the gaussian weighted x and y responses on rotated axis
+					rrx0 = gauss_s1_0 * (-rx0 * si + ry0 * co);
+					rry0 = gauss_s1_0 * (rx0 * co + ry0 * si);
+
+					if (bExtended)
+					{
+						// split x responses for different signs of y
+						if (rry0 >= 0)
+						{
+							dx += rrx0;
+							mdx += fabs(rrx0);
+						}
+						else
+						{
+							dx_yn += rrx0;
+							mdx_yn += fabs(rrx0);
+						}
+
+						// split y responses for different signs of x
+						if (rrx0 >= 0)
+						{
+							dy += rry0;
+							mdy += fabs(rry0);
+						}
+						else
+						{
+							dy_xn += rry0;
+							mdy_xn += fabs(rry0);
+						}
+					}
+					else
+					{
+						dx += rrx0;
+						dy += rry0;
+						mdx += fabs(rrx0);
+						mdy += fabs(rry0);
 					}
 				}
 			}

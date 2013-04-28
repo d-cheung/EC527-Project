@@ -1,5 +1,5 @@
 default:
-	g++ -01 *.cpp -o surf -lrt -lm
+	g++ -O1 *.cpp -o surf -lrt -lm
 gdb: 
 	g++ -g *.cpp -o surf -lrt -lm
 
