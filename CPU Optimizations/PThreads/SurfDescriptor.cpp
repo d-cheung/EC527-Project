@@ -5,6 +5,18 @@
 #include "IPoint.h"
 #include "IntegralImage.h"
 #include "FastHessian.h"
+#include "parameters.h"
+#include <pthread.h>
+
+struct thread_data {
+	int thread_id;
+	IntegralImage* img;
+	int i,j, xs, ys;
+	int X,Y,S;
+	float dx, dy, mdx, mdy, co, si;
+    	float dx_yn, mdx_yn, dy_xn, mdy_xn;
+	bool bExtended;
+};
 
 float SurfDescriptor::gauss25[7][7] = {
 	{(float)0.02350693969273,(float)0.01849121369071,(float)0.01239503121241,(float)0.00708015417522,(float)0.00344628101733,(float)0.00142945847484,(float)0.00050524879060}, 
@@ -138,6 +150,10 @@ void SurfDescriptor::GetOrientation(IPoint &ip)
     /// <param name="bUpright"></param>
 void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 {
+    void * GetDescriptor_work(void * threadarg);
+    pthread_t threads[NUM_THREADS];
+    struct thread_data data[NUM_THREADS];
+
     int sample_x, sample_y, count = 0;
     int i = 0, ix = 0, j = 0, jx = 0, xs = 0, ys = 0;
     float dx, dy, mdx, mdy, co, si;
@@ -167,25 +183,24 @@ void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 
     //Calculate descriptor for this interest point
     i = -8;
-    while (i < 12)
+    for(int i = -12; i < 4; i+=5)
+    //while (i < 12)
     {
 		j = -8;
-		i = i - 4;
+		//i = i - 4;
 
 		cx += (float)1;
 		cy = (float)-0.5;
-
-		while (j < 12)
+		
+		for(int j = -12; j < 4; j+=5)
+		//while (j < 12)
 		{
 			cy += (float)1;
 
-			j = j - 4;
-
+			//j = j - 4;
+			//printf("i=%d, j=%d\n",i,j);
 			ix = i + 5;
 			jx = j + 5;
-
-			dx = dy = mdx = mdy = (float)0;
-			dx_yn = mdx_yn = dy_xn = mdy_xn = (float)0;
 
 			xs = (int)floor(X + (-jx * S * si + ix * S * co) + (float)0.5);
 			ys = (int)floor(Y + (jx * S * co + ix * S * si) + (float)0.5);
@@ -194,59 +209,54 @@ void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 			dx = dy = mdx = mdy = (float)0;
 			dx_yn = mdx_yn = dy_xn = mdy_xn = (float)0;
 
-			for (int k = i; k < i + 9; ++k)
+
+			for (int t = 0; t <NUM_THREADS; t++)
 			{
-				for (int l = j; l < j + 9; ++l)
+				data[t].thread_id = t;
+				data[t].img = img;
+				data[t].i = i;
+				data[t].j = j;
+				data[t].S = S;
+				data[t].co = co;
+				data[t].si = si;
+				data[t].X = X;
+				data[t].Y = Y;
+				data[t].dx = 0;
+				data[t].mdx =0;
+				data[t].dx_yn = 0;
+				data[t].mdx_yn = 0;
+				data[t].dy = 0;
+				data[t].mdy = 0;
+				data[t].dy_xn = 0;
+				data[t].mdy_xn = 0;
+				data[t].xs = xs;
+				data[t].ys = ys;
+				data[t].bExtended = bExtended;
+
+				int rc = pthread_create(&threads[t], NULL, GetDescriptor_work, (void*) &(data[t]));
+				if (rc)
 				{
-					//Get coords of sample point on the rotated axis
-					sample_x = (int)floor(X + (-l * S * si + k * S * co) + (float)0.5);
-					sample_y = (int)floor(Y + (l * S * co + k * S * si) + (float)0.5);
-
-					//Get the gaussian weighted x and y responses
-					gauss_s1 = Gaussian(xs - sample_x, ys - sample_y, (float)2.5 * S);
-					rx = (float)img->HaarX(sample_y, sample_x, 2 * S);
-					ry = (float)img->HaarY(sample_y, sample_x, 2 * S);
-
-					//Get the gaussian weighted x and y responses on rotated axis
-					rrx = gauss_s1 * (-rx * si + ry * co);
-					rry = gauss_s1 * (rx * co + ry * si);
-
-
-					if (bExtended)
-					{
-						// split x responses for different signs of y
-						if (rry >= 0)
-						{
-							dx += rrx;
-							mdx += fabs(rrx);
-						}
-						else
-						{
-							dx_yn += rrx;
-							mdx_yn += fabs(rrx);
-						}
-
-						// split y responses for different signs of x
-						if (rrx >= 0)
-						{
-							dy += rry;
-							mdy += fabs(rry);
-						}
-						else
-						{
-							dy_xn += rry;
-							mdy_xn += fabs(rry);
-						}
-					}
-					else
-					{
-						dx += rrx;
-						dy += rry;
-						mdx += fabs(rrx);
-						mdy += fabs(rry);
-					}
+					printf("ERROR: return code from pthread_create() is %d\n", rc);
+					exit(-1);
 				}
 			}
+			for (int t = 0; t < NUM_THREADS; t++)
+			{
+				if (pthread_join(threads[t], NULL))
+				{
+					printf("\n ERROR on join SURFDESCRIPTOR\n");
+					exit(19);
+				}
+				dx += data[t].dx;
+				mdx += data[t].mdx;
+				dx_yn += data[t].dx_yn;
+				mdx_yn += data[t].mdx_yn;
+				dy += data[t].dy;
+				mdy += data[t].mdy;
+				dy_xn += data[t].dy_xn;
+				mdy_xn += data[t].mdy_xn;				
+			}
+					
 
 			//Add the values to the descriptor vector
 			gauss_s2 = Gaussian(cx - (float)2, cy - (float)2, (float)1.5);
@@ -268,9 +278,9 @@ void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 			len += (dx * dx + dy * dy + mdx * mdx + mdy * mdy
 					+ dx_yn + dy_xn + mdx_yn + mdy_xn) * gauss_s2 * gauss_s2;
 
-			j += 9;
+			//j += 9;
 		}
-		i += 9;
+		//i += 9;
     }
 
     //Convert to Unit Vector
@@ -282,6 +292,104 @@ void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 			ip.descriptor[d] /= len;
 		}
     }
+}
+
+
+void * GetDescriptor_work(void* threadarg)
+{
+	float myGaussian(int x, int y, float sig);
+	float myHaarX(int row, int column, int size, IntegralImage* img);
+	float myHaarY(int row, int column, int size, IntegralImage* img);
+	thread_data* data = (thread_data *) threadarg;
+	int t = data->thread_id;
+	IntegralImage* img = data->img;
+	int i = data->i;
+	int j = data->j;
+	int S = data->S;
+	float co = data->co;
+	float si = data->si;
+	int X = data->X;
+	int Y = data->Y;
+	int xs = data->xs;
+	int ys = data->ys;
+	bool bExtended = data->bExtended;
+	
+	int start,end;
+	if (NUM_THREADS <9)
+	{
+		start = NUM_THREADS * t + i;
+		end = NUM_THREADS + start;
+	}
+	else
+	{
+		start = t + i;
+		end = 1 + start;
+	}
+	if (end > i + 9) end  = i + 9;
+
+	//printf("Thread %d, i %d, start %d, end %d\n",t,i, start,end);
+	for (int k = start; k < end; ++k)
+	{
+		for (int l = j; l < j + 9; ++l)
+		{
+
+			//Get coords of sample point on the rotated axis
+			int sample_x = (int)floor(X + (-l * S * si + k * S * co) + (float)0.5);
+			int sample_y = (int)floor(Y + (l * S * co + k * S * si) + (float)0.5);
+
+			//Get the gaussian weighted x and y responses
+			float gauss_s1 = myGaussian(xs - sample_x, ys - sample_y, (float)2.5 * S);
+			float rx = (float)(img->HaarX(sample_y, sample_x, 2 * S));
+			float ry = (float)(img->HaarY(sample_y, sample_x, 2 * S));
+
+
+			//Get the gaussian weighted x and y responses on rotated axis
+			float rrx = gauss_s1 * (-rx * si + ry * co);
+			float rry = gauss_s1 * (rx * co + ry * si);
+
+
+			if (bExtended)
+			{
+				// split x responses for different signs of y
+				if (rry >= 0)
+				{
+					data->dx = rrx;
+					data->mdx = fabs(rrx);
+				}
+				else
+				{
+					data->dx_yn = rrx;
+					data->mdx_yn = fabs(rrx);
+				}
+
+				// split y responses for different signs of x
+				if (rrx >= 0)
+				{
+					data->dy = rry;
+					data->mdy = fabs(rry);
+				}
+				else
+				{
+					data->dy_xn = rry;
+					data->mdy_xn = fabs(rry);
+				}
+			}
+			else
+			{
+				data->dx = rrx;
+				data->dy = rry;
+				data->mdx = fabs(rrx);
+				data->mdy = fabs(rry);
+			}
+		}
+	}
+	pthread_exit(NULL);
+}
+
+float myGaussian(int x, int y, float sig)
+{
+  float pi = (float)M_PI;
+  return ((float)1 / ((float)2 * pi * sig * sig)) * (float)exp(-(x * x + y * y) / ((float)2.0 * sig * sig));
 }
 
 

@@ -2,10 +2,9 @@
 #include "bitmap_image.hpp"
 #include <pthread.h>
 #include <cmath>
+#include "parameters.h"
 
-const int NUM_THREADS = 32;
-
-pthread_barrier_t barr;
+pthread_barrier_t barr_ii;
 struct thread_data {
 	int thread_id;
 	IntegralImage * pic;
@@ -70,7 +69,7 @@ IntegralImage * IntegralImage::FromImage(bitmap_image &image)
 	pthread_t threads[NUM_THREADS];
 	struct thread_data data[NUM_THREADS];
 
-	if (pthread_barrier_init(&barr, NULL, NUM_THREADS))
+	if (pthread_barrier_init(&barr_ii, NULL, NUM_THREADS))
 	{
 		printf("Could not createa barrier\n");
 		exit(-1);
@@ -131,7 +130,7 @@ void  * FromImage_work(void * threadarg)
 	}
 
 
-	int rc = pthread_barrier_wait(&barr);
+	int rc = pthread_barrier_wait(&barr_ii);
 	if (rc != 0 && rc!= PTHREAD_BARRIER_SERIAL_THREAD)
 	{
 		printf("Could not wait on barrier\n");
@@ -158,13 +157,16 @@ void  * FromImage_work(void * threadarg)
 
 float IntegralImage::BoxIntegral(int row, int col, int rows, int cols)
 {
+	//printf("row = %d, Height = %d, col = %d, Width = %d\n", row,Height,col,Width);
 	// The subtraction by one for row/col is because row/col is inclusive.
 	int r1 = std::min(row, Height) - 1;
 	int c1 = std::min(col, Width) - 1;
 	int r2 = std::min(row + rows, Height) - 1;
 	int c2 = std::min(col + cols, Width) - 1;
-
+	//printf("After min\n");
 	float A = 0, B = 0, C = 0, D = 0;
+
+	//printf("r1 = %d, c1 = %d, r2 = %d, c2 =%d", r1,c1,r2,r2);
 /*
 	if (r1 >= 0 && c1 >= 0) A = Matrix[r1*Height+c1];
 	if (r1 >= 0 && c2 >= 0) B = Matrix[r1*Height+c2];

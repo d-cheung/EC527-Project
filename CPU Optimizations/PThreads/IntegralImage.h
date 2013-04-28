@@ -9,17 +9,16 @@ class IntegralImage
 private:
 
 //	float * Matrix;
-	float ** Matrix;
+
 
 	IntegralImage(int width, int height);
-	
-	//PThread work function
-	void * FromImage_work(void * threadarg);
+
 
 public:
 	static const float cR;
 	static const float cG;
 	static const float cB;
+	float ** Matrix;
 	int Width, Height;
 
 	//Get the value at [y,x]

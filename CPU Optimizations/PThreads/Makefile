@@ -1,5 +1,5 @@
 default:
-	g++ -pthread *.cpp -o surf -lrt -lm
+	g++ -O1 -pthread *.cpp -o surf -lrt -lm
 gdb: 
 	g++ -g *.cpp -o surf -lrt -lm
 

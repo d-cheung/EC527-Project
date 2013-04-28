@@ -3,6 +3,20 @@
 #include <vector>
 #include "FastHessian.h"
 #include "IntegralImage.h"
+#include "parameters.h"
+#include <pthread.h>
+
+struct thread_data {
+	int thread_id;
+	FastHessian::ResponseLayer * rl;
+	IntegralImage * img;
+	int step;
+	int b;
+	int l;
+	int w;
+	float inverse_area;
+};
+
 
 /// <summary>
 /// Static one-call do it all method
@@ -153,17 +167,67 @@ void FastHessian::buildResponseMap()
 /// <param name="rl"></param>
 void FastHessian::buildResponseLayer(ResponseLayer &rl)
 {
+	void * buildResponseLayer_work(void * threadarg);
 	int step = rl.step;                      // step size for this filter
 	int b = (rl.filter - 1) / 2;             // border for this filter
 	int l = rl.filter / 3;                   // lobe for this filter (filter size / 3)
 	int w = rl.filter;                       // filter size
 	float inverse_area = (float)1.0 / (w * w);       // normalisation factor
+
+	pthread_t threads[NUM_THREADS];
+	struct thread_data data[NUM_THREADS];
+
+	for (int t = 0; t < NUM_THREADS; t++)
+	{
+		data[t].thread_id = t;
+		data[t].rl = &rl;
+		data[t].img = img;
+		data[t].step = step;
+		data[t].b = b;
+		data[t].l = l;
+		data[t].w = w;
+		data[t].inverse_area = inverse_area;
+
+		int rc = pthread_create(&threads[t], NULL, buildResponseLayer_work, (void*) &(data[t]));
+		if (rc)
+		{
+			printf("ERROR: return code from pthread_create() is %d\n", rc);
+			exit(-1);
+		}
+	}
+	
+	for (int t = 0; t < NUM_THREADS; t++)
+	{
+		if (pthread_join(threads[t], NULL))
+		{
+			printf("\n ERROR on join\n");
+			exit(19);
+		}
+	}
+}
+
+void * buildResponseLayer_work(void * threadarg)
+{
+	struct thread_data * my_data = (struct thread_data *) threadarg;
+	int thread_id = my_data->thread_id;
+	FastHessian::ResponseLayer * rl = my_data->rl;
+	IntegralImage * img = my_data->img;
+	int step = my_data->step;                      // step size for this filter
+	int b = my_data->b;             // border for this filter
+	int l = my_data->l;                   // lobe for this filter (filter size / 3)
+	int w = my_data->w;                       // filter size
+	float inverse_area = my_data->inverse_area;       // normalisation factor
 	float Dxx, Dyy, Dxy;
 
-	for (int r, c, ar = 0, index = 0; ar < rl.height; ++ar)
+	unsigned int start = (rl->height / NUM_THREADS) * thread_id;
+	unsigned int end = (rl->height / NUM_THREADS) + start;
+	if (end > rl->height) end  = rl->height;
+
+	for (int r, c, ar = start, index = start * rl->width; ar < end; ++ar)
 	{
-		for (int ac = 0; ac < rl.width; ++ac, index++)
+		for (int ac = 0; ac < rl->width; ++ac, index++)
 		{
+
 			// get the image coordinates
 			r = ar * step;
 			c = ac * step;
@@ -184,8 +248,8 @@ void FastHessian::buildResponseLayer(ResponseLayer &rl)
 			Dxy *= inverse_area;
 
 			// Get the determinant of hessian response & laplacian sign
-			rl.responses[index] = (Dxx * Dyy - (float)0.81 * Dxy * Dxy);
-			rl.laplacian[index] = (unsigned char)(Dxx + Dyy >= 0 ? 1 : 0);
+			rl->responses[index] = (Dxx * Dyy - (float)0.81 * Dxy * Dxy);
+			rl->laplacian[index] = (unsigned char)(Dxx + Dyy >= 0 ? 1 : 0);
 		}
 	}
 }

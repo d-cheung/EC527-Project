@@ -14,7 +14,6 @@ public:
 	~FastHessian();
 	std::vector<IPoint> * getIpoints();
 
-private: 
 	/// Reponse Layer 
 	class ResponseLayer
 	{
@@ -33,6 +32,9 @@ private:
 		float getResponse(int row, int column);
 		float getResponse(int row, int column, ResponseLayer &src);
 	};
+
+private: 
+
 
 	/// These are passed in
 	float thresh;
@@ -53,5 +55,6 @@ private:
 	double * Inverse(double * m);
 	double * MMM_neg_3x3_3x1(double * A, double * B);
 };
+
 
 #endif
