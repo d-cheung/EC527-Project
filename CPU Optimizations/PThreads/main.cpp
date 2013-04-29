@@ -8,9 +8,11 @@
 #include <cmath>
 #include <time.h>
 
+#define CPG 2.53           // Cycles per GHz -- Adjust to your computer
+#define ITERATIONS 10
+#define TOL 1
+
 #define GIG 1000000000
-#define CPG 2.1          // Cycles per GHz -- Adjust to your computer
-#define ITERATIONS 1
 
 /************************************************************************************
 *  Usage:
@@ -18,44 +20,96 @@
 *
 ************************************************************************************/
 
+struct timespec diff(struct timespec start, struct timespec end);
+
 int main(int argc, char ** argv)
 {
 	if (argc == 3)
 	{
 
+		int tests = 0;
 		void PaintSURF(bitmap_image &img, std::vector<IPoint> * ipts);
-		struct timespec diff(struct timespec start, struct timespec end);
 		int clock_gettime(clockid_t clk_id, struct timespec *tp);
 
 		struct timespec time1, time2;
+		struct timespec time_stamp_all[ITERATIONS];
 		struct timespec time_stamp[3][ITERATIONS];
-		long int i, j, k;
-		long int time_sec, time_ns;
-		const char * labels[3] = {"IntegralImage","FastHessian","SurfDescriptor"};
+
+		long int i, j;
 
 		std::string file_name(argv[1]);
 		bitmap_image image(file_name);
+		printf("File: %s, Width: %d, Height: %d\n", argv[1], image.width(), image.height());
+		IntegralImage * test_img = IntegralImage::FromImage(image);
+		delete test_img;
 
 		IntegralImage * iimg;
-		// Running IntegralImage
-		for (i = 0; i < ITERATIONS; i++)
+		std::vector<IPoint> * ipts = NULL;
+
+		for (int ii = 0; ii < ITERATIONS; ii++)
+		{
+			clock_gettime(CLOCK_REALTIME, &time1);
+
+			iimg = IntegralImage::FromImage(image);
+
+			ipts = NULL;
+			ipts = FastHessian::getIpoints((float)0.0002, 5, 2, iimg);
+
+			if (ipts == NULL)
+			{
+				printf("getIpoints failed\n");
+				return 0;
+			}
+
+			SurfDescriptor::DecribeInterestPoints(ipts, false, false, iimg);
+			clock_gettime(CLOCK_REALTIME, &time2);
+			time_stamp_all[ii] = diff(time1,time2);
+
+			if (ii != ITERATIONS - 1)
+			{
+				delete iimg;
+				delete ipts;
+			}
+		}
+
+		printf("Detected Features: %d\n", ipts->size());
+
+		printf("Cumulative Time: ");
+		for (j = 0; j < ITERATIONS; j++)
+		{
+			if (j != 0) printf(", ");
+
+			printf("%.2f", ((double)(GIG * time_stamp_all[j].tv_sec + time_stamp_all[j].tv_nsec) / (double)(1000000)));
+		}
+		printf("\n");
+
+		delete iimg;
+		delete ipts;
+
+		const char * labels[3] = {"IntegralImage","FastHessian","SurfDescriptor"};
+
+		for (int ii = 0; ii < ITERATIONS; ii++)
 		{
 			clock_gettime(CLOCK_REALTIME, &time1);
 			iimg = IntegralImage::FromImage(image);
 			clock_gettime(CLOCK_REALTIME, &time2);
-			time_stamp[0][i] = diff(time1,time2);
+			time_stamp[tests][ii] = diff(time1,time2);
+			if (ii != ITERATIONS - 1) delete iimg;
 		}
+		tests++;
 
-		std::vector<IPoint> * ipts = NULL;
+		ipts = NULL;
 
-		// Running FastHessian
-		for (i = 0; i < ITERATIONS; i++)
+		for (int ii = 0; ii < ITERATIONS; ii++)
 		{
 			clock_gettime(CLOCK_REALTIME, &time1);
 			ipts = FastHessian::getIpoints((float)0.0002, 5, 2, iimg);
 			clock_gettime(CLOCK_REALTIME, &time2);
-			time_stamp[1][i] = diff(time1,time2);
+			time_stamp[tests][ii] = diff(time1,time2);
+			if (ii != ITERATIONS - 1) delete ipts;
 		}
+		tests++;
+
 
 		if (ipts == NULL)
 		{
@@ -63,31 +117,29 @@ int main(int argc, char ** argv)
 			return 0;
 		}
 
-		// Running SurfDescriptor
-		for (i = 0; i < ITERATIONS; i++)
+		for (int ii = 0; ii < ITERATIONS; ii++)
 		{
 			clock_gettime(CLOCK_REALTIME, &time1);
 			SurfDescriptor::DecribeInterestPoints(ipts, false, false, iimg);
 			clock_gettime(CLOCK_REALTIME, &time2);
-			time_stamp[2][i] = diff(time1,time2);
+			time_stamp[tests][ii] = diff(time1,time2);
 		}
+		tests++;
 
 		PaintSURF(image, ipts);
 		image.save_image(argv[2]);
 
-		printf("Width: %d, Height, %d\n", image.width(), image.height());
-		for (i = 0; i < 3; i++)
+		for (i = 0; i < tests; i++)
 		{
 			printf("%s: ", labels[i]);
 			for (j = 0; j < ITERATIONS; j++)
 			{
 				if (j != 0) printf(", ");
 
-				printf("%ld", (long int)((double)(CPG)*(double)(GIG * time_stamp[i][j].tv_sec + time_stamp[i][j].tv_nsec)));
+				printf("%.2f", ((double)(GIG * time_stamp[i][j].tv_sec + time_stamp[i][j].tv_nsec) / (double)(1000000)));
 			}
-		printf("\n");
+			printf("\n");
 		}
-
 
 		delete iimg;
 		delete ipts;
@@ -101,6 +153,7 @@ int main(int argc, char ** argv)
 
 	return 0;
 }
+
 
 /*************************************************/
 
