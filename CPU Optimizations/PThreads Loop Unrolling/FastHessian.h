@@ -14,7 +14,7 @@ public:
 	~FastHessian();
 	std::vector<IPoint> * getIpoints();
 
-	/// Reponse Layer 
+	// Response Layer 
 	class ResponseLayer
 	{
 	
@@ -36,13 +36,13 @@ public:
 private: 
 
 
-	/// These are passed in
+	// These are passed in
 	float thresh;
 	int octaves;
 	int init_sample;
 	IntegralImage * img;
 
-	/// These get built
+	// These get built
 	std::vector<IPoint> * ipts;
 	std::vector<ResponseLayer *> * responseMap;
 

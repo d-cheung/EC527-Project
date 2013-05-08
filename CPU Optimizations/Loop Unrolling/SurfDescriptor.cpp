@@ -17,13 +17,7 @@ float SurfDescriptor::gauss25[7][7] = {
 };
 
 
-/// <summary>
-/// Static one-call do it all function
-/// </summary>
-/// <param name="img"></param>
-/// <param name="ipts"></param>
-/// <param name="extended"></param>
-/// <param name="upright"></param>
+// Static one-call do it all function
 void SurfDescriptor::DecribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage * img)
 {
     SurfDescriptor des;
@@ -31,12 +25,7 @@ void SurfDescriptor::DecribeInterestPoints(std::vector<IPoint>* ipts, bool uprig
 }
 
 
-/// <summary>
-    /// Build descriptor vector for each interest point in the supplied list
-    /// </summary>
-    /// <param name="img"></param>
-    /// <param name="ipts"></param>
-    /// <param name="upright"></param>
+// Build descriptor vector for each interest point in the supplied list
 void SurfDescriptor::DescribeInterestPoints(std::vector<IPoint>* ipts, bool upright, bool extended, IntegralImage *img)
 {
     if (ipts->size() == 0) return;
@@ -56,10 +45,7 @@ void SurfDescriptor::DescribeInterestPoints(std::vector<IPoint>* ipts, bool upri
     }
 }
 
-/// <summary>
-    /// Determine dominant orientation for InterestPoint
-    /// </summary>
-    /// <param name="ip"></param>
+// Determine dominant orientation for InterestPoint
 void SurfDescriptor::GetOrientation(IPoint &ip)
 {
   const unsigned char Responses = 109;
@@ -242,10 +228,7 @@ void SurfDescriptor::GetOrientation(IPoint &ip)
 }
 
 
-/// <summary>
-    /// Construct descriptor vector for this interest point
-    /// </summary>
-    /// <param name="bUpright"></param>
+// Construct descriptor vector for this interest point
 void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 {
     int sample_x0, sample_y0, count = 0;
@@ -562,12 +545,7 @@ void SurfDescriptor::GetDescriptor(IPoint &ip, bool bUpright, bool bExtended)
 }
 
 
-/// <summary>
-/// Get the angle formed by the vector [x,y]
-/// </summary>
-/// <param name="X"></param>
-/// <param name="Y"></param>
-/// <returns></returns>
+// Get the angle formed by the vector [x,y]
 double SurfDescriptor::GetAngle(float X, float Y)
 {
   if (X >= 0 && Y >= 0)
@@ -583,14 +561,8 @@ double SurfDescriptor::GetAngle(float X, float Y)
 }
 
 
-/// <summary>
-/// Get the value of the gaussian with std dev sigma
-/// at the point (x,y)
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="sig"></param>
-/// <returns></returns>
+// Get the value of the gaussian with std dev sigma
+// at the point (x,y)
 float SurfDescriptor::Gaussian(int x, int y, float sig)
 {
   float pi = (float)M_PI;
@@ -598,14 +570,8 @@ float SurfDescriptor::Gaussian(int x, int y, float sig)
 }
 
 
-/// <summary>
-/// Get the value of the gaussian with std dev sigma
-/// at the point (x,y)
-/// </summary>
-/// <param name="x"></param>
-/// <param name="y"></param>
-/// <param name="sig"></param>
-/// <returns></returns>
+// Get the value of the gaussian with std dev sigma
+// at the point (x,y)
 float SurfDescriptor::Gaussian(float x, float y, float sig)
 {
   float pi = (float)M_PI;

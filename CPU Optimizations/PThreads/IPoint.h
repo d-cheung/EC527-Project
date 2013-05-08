@@ -6,9 +6,6 @@ class IPoint
 
 public:
 
-	/// <summary>
-	/// Default ctor
-	/// </summary>
 	IPoint()
 	{
 		orientation = 0;
@@ -21,34 +18,22 @@ public:
 			delete [] descriptor;
 	}
 
-	/// <summary>
-	/// Coordinates of the detected interest point
-	/// </summary>
+	// Coordinates of the detected interest point
 	float x, y;
 
-	/// <summary>
-	/// Detected scale
-	/// </summary>
+	// Detected scale
 	float scale;
 
-	/// <summary>
-	/// Response of the detected feature (strength)
-	/// </summary>
+	// Response of the detected feature (strength)
 	float response;
 
-	/// <summary>
-	/// Orientation measured anti-clockwise from +ve x-axis
-	/// </summary>
+	// Orientation measured anti-clockwise from +ve x-axis
 	float orientation;
 
-	/// <summary>
-	/// Sign of laplacian for fast matching purposes
-	/// </summary>
+	// Sign of laplacian for fast matching purposes
 	int laplacian;
 
-	/// <summary>
-	/// Descriptor vector
-	/// </summary>
+	// Descriptor vector
 	int descriptorLength;
 	float * descriptor;
 

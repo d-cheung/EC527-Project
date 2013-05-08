@@ -18,14 +18,7 @@ struct thread_data {
 };
 
 
-/// <summary>
-/// Static one-call do it all method
-/// </summary>
-/// <param name="thresh"></param>
-/// <param name="octaves"></param>
-/// <param name="init_sample"></param>
-/// <param name="img"></param>
-/// <returns></returns>
+// Static one-call do it all method
 std::vector<IPoint> * FastHessian::getIpoints(float thresh, int octaves, int init_sample, IntegralImage * img)
 {
 	FastHessian fh(thresh, octaves, init_sample, img);
@@ -33,13 +26,7 @@ std::vector<IPoint> * FastHessian::getIpoints(float thresh, int octaves, int ini
 }
 
 
-/// <summary>
-/// Constructor with parameters
-/// </summary>
-/// <param name="thresh"></param>
-/// <param name="octaves"></param>
-/// <param name="init_sample"></param>
-/// <param name="img"></param>
+// Constructor with parameters
 FastHessian::FastHessian(float thresh, int octaves, int init_sample, IntegralImage * img)
 {
 	this->thresh = thresh;
@@ -59,9 +46,7 @@ FastHessian::~FastHessian()
 	}
 }
 
-/// <summary>
-/// Find the image features and write into vector of features
-/// </summary>
+// Find the image features and write into vector of features
 std::vector<IPoint> * FastHessian::getIpoints()
 {
 	// filter index map
@@ -99,9 +84,7 @@ std::vector<IPoint> * FastHessian::getIpoints()
 }
 
 
-/// <summary>
-/// Build map of DoH responses
-/// </summary>
+// Build map of DoH responses
 void FastHessian::buildResponseMap()
 {
 	// Calculate responses for the first 4 octaves:
@@ -161,10 +144,7 @@ void FastHessian::buildResponseMap()
 }
 
 
-/// <summary>
-/// Build Responses for a given ResponseLayer
-/// </summary>
-/// <param name="rl"></param>
+// Build Responses for a given ResponseLayer
 void FastHessian::buildResponseLayer(ResponseLayer &rl)
 {
 	void * buildResponseLayer_work(void * threadarg);
@@ -255,15 +235,7 @@ void * buildResponseLayer_work(void * threadarg)
 }
 
 
-/// <summary>
-/// Test whether the point r,c in the middle layer is extremum in 3x3x3 neighbourhood
-/// </summary>
-/// <param name="r">Row to be tested</param>
-/// <param name="c">Column to be tested</param>
-/// <param name="t">Top ReponseLayer</param>
-/// <param name="m">Middle ReponseLayer</param>
-/// <param name="b">Bottome ReponseLayer</param>
-/// <returns></returns>
+// Test whether the point r,c in the middle layer is extremum in 3x3x3 neighbourhood
 bool FastHessian::isExtremum(int r, int c, ResponseLayer &t, ResponseLayer &m, ResponseLayer &b)
 {
 	// bounds check
@@ -294,14 +266,7 @@ bool FastHessian::isExtremum(int r, int c, ResponseLayer &t, ResponseLayer &m, R
 }
 
 
-/// <summary>
-/// Interpolate scale-space extrema to subpixel accuracy to form an image feature
-/// </summary>
-/// <param name="r"></param>
-/// <param name="c"></param>
-/// <param name="t"></param>
-/// <param name="m"></param>
-/// <param name="b"></param>
+// Interpolate scale-space extrema to subpixel accuracy to form an image feature
 void FastHessian::interpolateExtremum(int r, int c, ResponseLayer &t, ResponseLayer &m, ResponseLayer &b)
 {
 	double * D  = BuildDerivative(r, c, t, m, b);
@@ -338,14 +303,7 @@ void FastHessian::interpolateExtremum(int r, int c, ResponseLayer &t, ResponseLa
 
 }
 
-/// <summary>
-/// Build Matrix of First Order Scale-Space derivatives
-/// </summary>
-/// <param name="octave"></param>
-/// <param name="interval"></param>
-/// <param name="row"></param>
-/// <param name="column"></param>
-/// <returns>3x1 Matrix of Derivatives</returns>
+// Build Matrix of First Order Scale-Space derivatives
 double * FastHessian::BuildDerivative(int r, int c, ResponseLayer &t, ResponseLayer &m, ResponseLayer &b)
 {
 	double dx, dy, ds;
@@ -362,14 +320,7 @@ double * FastHessian::BuildDerivative(int r, int c, ResponseLayer &t, ResponseLa
 }
 
 
-/// <summary>
-/// Build Hessian Matrix 
-/// </summary>
-/// <param name="octave"></param>
-/// <param name="interval"></param>
-/// <param name="row"></param>
-/// <param name="column"></param>
-/// <returns>3x3 Matrix of Second Order Derivatives</returns>
+// Build Hessian Matrix 
 double * FastHessian::BuildHessian(int r, int c, ResponseLayer &t, ResponseLayer &m, ResponseLayer &b)
 {
 	double v, dxx, dyy, dss, dxy, dxs, dys;
@@ -398,6 +349,7 @@ double * FastHessian::BuildHessian(int r, int c, ResponseLayer &t, ResponseLayer
 	return H;
 }
 
+// Return inverse of the Matrix m
 double * FastHessian::Inverse(double * m)
 {
 	double det = ((m[0]*m[4]*m[8]) + (m[1]*m[5]*m[6]) + (m[2]*m[3]*m[7]) -
@@ -430,6 +382,7 @@ double * FastHessian::Inverse(double * m)
 
 }
 
+// Perform -1 * (A * B) where A is a 3x3 matrix and B is a 3x1 matrix
 double * FastHessian::MMM_neg_3x3_3x1(double * A, double * B)
 {
 	double * C = new double[3];

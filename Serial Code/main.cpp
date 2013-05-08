@@ -175,13 +175,12 @@ struct timespec diff(struct timespec start, struct timespec end)
 void PaintSURF(bitmap_image &img, std::vector<IPoint> * ipts)
 {
 
-	unsigned char   red[3] = {0xFF, 0x00, 0x00};
-	unsigned char green[3] = {0x00, 0xFF, 0x00};
-	unsigned char  blue[3] = {0x00, 0x00, 0xFF};
 	image_drawer idrawer(img);
 
-	for (std::vector<IPoint>::iterator ip = ipts->begin(); ip != ipts->end(); ++ip)
+	int count;
+	for (std::vector<IPoint>::iterator ip = ipts->begin(); ip != ipts->end(); ++ip, count++)
 	{
+//		printf("Point %d: (%f, %f), scale: %f, response %f, orientation: %f, laplacian: %d\n", count, ip->x, ip->y, ip->scale, ip->response, ip->orientation, ip->laplacian);
 		unsigned char myPen[3] = {0x00, 0x00, 0x00};
 		int S = 2 * (int)((float)2.5 * ip->scale);
 		int R = (int)(S / (float)2.0);

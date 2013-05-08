@@ -15,7 +15,7 @@ public:
 	std::vector<IPoint> * getIpoints();
 
 private: 
-	/// Reponse Layer 
+	// Response Layer 
 	class ResponseLayer
 	{
 	
@@ -34,13 +34,13 @@ private:
 		float getResponse(int row, int column, ResponseLayer &src);
 	};
 
-	/// These are passed in
+	// These are passed in
 	float thresh;
 	int octaves;
 	int init_sample;
 	IntegralImage * img;
 
-	/// These get built
+	// These get built
 	std::vector<IPoint> * ipts;
 	std::vector<ResponseLayer *> * responseMap;
 

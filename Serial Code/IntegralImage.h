@@ -9,7 +9,6 @@ private:
 	static const float cR;
 	static const float cG;
 	static const float cB;
-//	float * Matrix;
 	float ** Matrix;
 
 	IntegralImage(int width, int height);
@@ -17,10 +16,10 @@ private:
 public:
 	int Width, Height;
 
-	//Get the value at [y,x]
+	//Get the value at [y][x]
 	float getValue(int y, int x);
 	
-	//Set the value at [y,x]
+	//Set the value at [y][x]
 	void setValue(int y, int x, float value);
 
 	//get the IntegralImage from Bitmap
